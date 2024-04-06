@@ -36,27 +36,39 @@ app.post('/upload', upload.single('images'), async (req, res) => {
     try {
         const file = req.file;
         let convertedBuffer;
+        let pathName;
 
         if (file.mimetype.startsWith('image')) {
             convertedBuffer = await sharp(file.buffer).webp().toBuffer();
         } else {
-         
             convertedBuffer = file.buffer;
         }
 
-
         const fileExtension = file.originalname.split('.').pop();
+        const fileExtension1 = file.originalname
         const fileName = `file_${Date.now()}.${fileExtension.replace(/\s/g, '')}`;
         const {bucketName} = req.body
         const s3Response = await uploadToS3({ buffer: convertedBuffer }, fileName,bucketName);
-        const pathName = new URL(s3Response.Location).pathname;
-
-        res.json({ data: pathName.replace(/^\//, '') });
+        
+        if (isValidURL(url1)) {
+         pathName = new URL(s3Response.Location).pathname;
+        } else {
+          pathName = s3Response.Location.split('.com/').pop()
+        }
+        res.json({ data:pathName.replace(/^\//, '') });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
+function isValidURL(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
 app.post('/multiple/upload', upload.array('images', 10), async (req, res) => {
         try {
             const files = req.files; 
