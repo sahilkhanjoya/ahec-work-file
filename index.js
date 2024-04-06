@@ -50,7 +50,7 @@ app.post('/upload', upload.single('images'), async (req, res) => {
         const {bucketName} = req.body
         const s3Response = await uploadToS3({ buffer: convertedBuffer }, fileName,bucketName);
         
-        if (isValidURL(url1)) {
+        if (isValidURL(s3Response.Location)) {
          pathName = new URL(s3Response.Location).pathname;
         } else {
           pathName = s3Response.Location.split('.com/').pop()
